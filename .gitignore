@@ -1,0 +1,12 @@
+materials/
+_check/
+
+# OS / Google Drive
+.DS_Store
+Thumbs.db
+desktop.ini
+*.gdoc
+*.gsheet
+*.gslides
+.tmp.driveupload/
+.tmp.drivedownload/

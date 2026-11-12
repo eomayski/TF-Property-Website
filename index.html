@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TF Property Single-Member P.C.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout idea: a fixed full-screen scene scrubbed by scroll; text panels ride over it in normal flow. */
+  --lime: #f5f2ea;        /* whitewashed wall */
+  --aegean: #12355b;      /* deep sea, text */
+  --sea: #2e7fa8;         /* daytime water */
+  --sand: #d8c4a2;        /* plot */
+  --bloom: #b3206b;       /* bougainvillea accent */
+  --ink-soft: #4a607a;
+  --glass: rgba(10, 26, 48, 0.42);          /* dark tinted glass, readable by day and at dusk */
+  --glass-edge: rgba(255, 255, 255, 0.30);
+  --on-glass: #ffffff;
+  --on-glass-soft: rgba(255, 255, 255, 0.78);
+  --bloom-light: #ff9ccb;
+  --display: "Poppins", "Manrope", "Helvetica Neue", Arial, sans-serif;
+  --body: "Manrope", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body {
+  margin: 0;
+  background: var(--aegean);
+  color: var(--aegean);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.55;
+}
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+}
+#poster {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+main { position: relative; z-index: 1; }
+.beat {
+  min-height: 130vh;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(16px, 6vw, 96px);
+}
+.beat:first-child { min-height: 100vh; align-items: flex-end; padding-bottom: 10vh; }
+.beat:last-child { min-height: 110vh; }
+.beat.right { justify-content: flex-end; padding-right: clamp(200px, 17vw, 280px); }
+.panel, .rail {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: 0 18px 50px rgba(6, 16, 32, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  color: var(--on-glass);
+}
+.panel {
+  max-width: 30rem;
+  padding: clamp(22px, 3vw, 38px);
+  border-radius: 28px;
+}
+.label {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--bloom-light);
+  font-weight: 700;
+  margin: 0 0 0.6rem;
+}
+h1, h2 {
+  font-family: var(--display);
+  margin: 0;
+  text-wrap: balance;
+}
+h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 600; line-height: 1.18; }
+.brand {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 3;
+  padding: clamp(16px, 2.6vw, 30px) clamp(16px, 6vw, 96px) clamp(40px, 6vw, 80px);
+  background: linear-gradient(rgba(6, 18, 38, 0.62), rgba(6, 18, 38, 0));
+  color: #fff;
+  pointer-events: none;
+}
+.brand h1 {
+  font-size: clamp(1.9rem, 5.4vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 18px rgba(6, 18, 38, 0.45);
+}
+.brand p {
+  margin: 0.55rem 0 0;
+  font-size: clamp(0.72rem, 1.3vw, 0.95rem);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 10px rgba(6, 18, 38, 0.6);
+}
+p { margin: 0.8rem 0 0; }
+.afm { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+dl { margin: 1rem 0 0; display: grid; grid-template-columns: auto 1fr; gap: 0.45rem 1.2rem; }
+dt { color: var(--on-glass-soft); font-size: 0.85rem; padding-top: 0.15rem; }
+dd { margin: 0; overflow-wrap: anywhere; }
+a { color: var(--on-glass); text-decoration-color: var(--bloom-light); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--bloom-light); outline-offset: 3px; }
+.rail {
+  position: fixed;
+  right: clamp(12px, 2.5vw, 32px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 22px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.rail li {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 8px 12px; border-radius: 14px;
+  color: var(--on-glass-soft);
+  transition: background 0.25s, color 0.25s;
+}
+.rail li::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: 0.6; }
+.rail li.on { color: #fff; background: rgba(255, 255, 255, 0.20); }
+.rail li.on::after { background: var(--bloom-light); opacity: 1; box-shadow: 0 0 10px var(--bloom-light); }
+.note {
+  position: fixed;
+  left: 12px;
+  bottom: 10px;
+  z-index: 2;
+  font-size: 0.7rem;
+  color: var(--lime);
+  background: rgba(18, 53, 91, 0.7);
+  padding: 4px 8px;
+}
+@media (max-width: 640px) {
+  .rail { display: none; }
+  .panel { border-radius: 22px; }
+  .beat.right { justify-content: flex-start; padding-right: clamp(16px, 6vw, 96px); }
+}
+</style>
+</head>
+<body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<picture>
+  <source media="(max-width: 700px)" srcset="poster-m.webp">
+  <img id="poster" src="poster.webp" alt="" fetchpriority="high">
+</picture>
+
+<header class="brand">
+  <h1>TF Property</h1>
+  <p>Single-Member P.C. &middot; <span lang="el">ΜΟΝΟΠΡΟΣΩΠΗ Ι.Κ.Ε.</span></p>
+</header>
+
+<ol class="rail" aria-hidden="true">
+  <li data-at="0">Land</li>
+  <li data-at="0.12">Build</li>
+  <li data-at="0.45">Home</li>
+  <li data-at="0.72">Stay</li>
+</ol>
+
+<main>
+  <section class="beat">
+    <div class="panel">
+      <p class="label">Company</p>
+      <h2>&ldquo;TF Property&rdquo; Single-Member P.C.</h2>
+      <p lang="el">&ldquo;TF PROPERTY ΜΟΝΟΠΡΟΣΩΠΗ Ι.Κ.Ε.&rdquo;</p>
+      <p class="afm">Tax number (A.F.M.) 803462110</p>
+    </div>
+  </section>
+
+  <section class="beat right">
+    <div class="panel">
+      <p class="label">Scope of activity</p>
+      <h2>Construction</h2>
+      <p>From an empty plot to a finished building.</p>
+    </div>
+  </section>
+
+  <section class="beat">
+    <div class="panel">
+      <p class="label">Scope of activity</p>
+      <h2>Real estate transactions and leasing of real estate</h2>
+    </div>
+  </section>
+
+  <section class="beat right">
+    <div class="panel">
+      <p class="label">Scope of activity</p>
+      <h2>Tourism</h2>
+      <p>As well as any other activity not prohibited by law.</p>
+    </div>
+  </section>
+
+  <section class="beat">
+    <div class="panel">
+      <p class="label">Company details</p>
+      <h2>&ldquo;TF Property&rdquo; Single-Member P.C.</h2>
+      <dl>
+        <dt>Greek name</dt><dd lang="el">&ldquo;TF PROPERTY ΜΟΝΟΠΡΟΣΩΠΗ Ι.Κ.Ε.&rdquo;</dd>
+        <dt>A.F.M.</dt><dd class="afm">803462110</dd>
+        <dt>Manager</dt><dd>Liubomir Vladikin</dd>
+        <dt>Mail</dt><dd><a href="mailto:liubomir_vladikin@vladikin.com">liubomir_vladikin@vladikin.com</a></dd>
+        <dt>Phone</dt><dd><a href="tel:+359890511290">+359 890511290</a></dd>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<div class="note" id="note" hidden>Placeholder scene.</div>
+
+<script>
+/* ---------- Swap in the real video here ----------
+   Export the clip to numbered frames (see ffmpeg command in the chat),
+   put them next to this file and set count to the number of frames. */
+const FRAMES = {
+  count: 149,
+  dir: Math.min(innerWidth, innerHeight * 16 / 9) * Math.min(devicePixelRatio || 1, 2) > 1000 ? 'frames' : 'frames-m',
+  src: i => FRAMES.dir + '/f_' + String(i + 1).padStart(4, '0') + '.webp'
+};
+
+const POSTER_FADE = 0.05;                     // share of the scroll over which the still fades into the video
+const poster = document.getElementById('poster');
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const W = 1600, H = 900, GROUND = 690;
+let cw = 0, ch = 0, dpr = 1, images = [], progress = -1;
+
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const span = (p, a, b) => clamp((p - a) / (b - a));
+const ease = t => t * t * (3 - 2 * t);
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+function mix(stops, t) {            // stops: [[pos, '#rrggbb'], ...]
+  let a = stops[0], b = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (t >= stops[i][0] && t <= stops[i + 1][0]) { a = stops[i]; b = stops[i + 1]; break; }
+  }
+  const k = b[0] === a[0] ? 0 : clamp((t - a[0]) / (b[0] - a[0]));
+  const ca = hex(a[1]), cb = hex(b[1]);
+  return 'rgb(' + ca.map((c, i) => Math.round(c + (cb[i] - c) * k)).join(',') + ')';
+}
+function poly(points, fill, stroke) {
+  ctx.beginPath();
+  points.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
+}
+function line(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+
+const BLOCKS = [                    // x, top, width (all stand on GROUND)
+  [760, 470, 360],                  // main, two floors
+  [1120, 575, 210],                 // side wing with roof terrace
+  [640, 605, 120]                   // low wing
+];
+const WINDOWS = [
+  [800, 505, 60, 70], [900, 505, 60, 70], [1020, 505, 60, 70],
+  [800, 610, 60, 80], [1020, 610, 60, 70],
+  [1160, 610, 130, 80], [668, 630, 64, 40]
+];
+const STARS = Array.from({ length: 70 }, (_, i) => [(i * 733) % W, (i * 397) % 430, 0.6 + (i % 5) * 0.25]);
+
+function drawScene(p) {
+  const build = span(p, 0.2, 0.45), walls = ease(span(p, 0.45, 0.68)), dusk = ease(span(p, 0.75, 1));
+
+  // sky
+  const g = ctx.createLinearGradient(0, 0, 0, 540);
+  g.addColorStop(0, mix([[0, '#6fa9d2'], [0.7, '#5a8cb8'], [1, '#101d3a']], p));
+  g.addColorStop(1, mix([[0, '#dcebf2'], [0.7, '#f1c9a2'], [1, '#a84f78']], p));
+  ctx.fillStyle = g; ctx.fillRect(-200, -200, W + 400, 760);
+
+  // stars
+  ctx.fillStyle = '#fff';
+  STARS.forEach(([x, y, r]) => { ctx.globalAlpha = dusk * 0.85; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); });
+  ctx.globalAlpha = 1;
+
+  // sun
+  const sunY = 170 + 400 * ease(span(p, 0, 0.9));
+  ctx.fillStyle = mix([[0, '#fff6d8'], [0.7, '#ffb46b'], [1, '#e2603f']], p);
+  ctx.beginPath(); ctx.arc(1290, sunY, 46, 0, 7); ctx.fill();
+
+  // island and sea
+  poly([[60, 540], [180, 500], [300, 486], [430, 510], [520, 540]], mix([[0, '#8fb0c4'], [1, '#1a2b4d']], p));
+  ctx.fillStyle = mix([[0, '#2e7fa8'], [0.7, '#2a6a93'], [1, '#0e1d38']], p);
+  ctx.fillRect(-200, 540, W + 400, 200);
+  ctx.strokeStyle = mix([[0, '#fff6d8'], [0.7, '#ffc58a'], [1, '#e58a6a']], p);
+  ctx.lineWidth = 3;
+  for (let i = 0; i < 9; i++) {
+    ctx.globalAlpha = 0.55 - i * 0.05;
+    const half = 60 - i * 5 + (i % 2) * 14;
+    line(1290 - half, 552 + i * 9, 1290 + half, 552 + i * 9);
+  }
+  ctx.globalAlpha = 1;
+
+  // land
+  poly([[-200, 705], [300, 652], [700, 622], [1100, 612], [1800, 645], [1800, 1100], [-200, 1100]],
+    mix([[0, '#d8c4a2'], [0.7, '#cfae86'], [1, '#3a3550']], p));
+
+  // plot outline and survey stakes
+  const plotA = 1 - walls;
+  if (plotA > 0) {
+    ctx.globalAlpha = plotA;
+    ctx.setLineDash([14, 10]); ctx.lineWidth = 3;
+    poly([[600, 700], [1370, 690], [1470, 800], [540, 815]], null, '#12355b');
+    ctx.setLineDash([]);
+    [[600, 700], [1370, 690], [1470, 800], [540, 815]].forEach(([x, y]) => {
+      ctx.strokeStyle = '#12355b'; ctx.lineWidth = 4; line(x, y, x, y - 46);
+      poly([[x, y - 46], [x + 24, y - 38], [x, y - 30]], '#b3206b');
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  // structural frame, revealed from the ground up
+  if (build > 0) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, GROUND - 240 * ease(build), W, 400); ctx.clip();
+    ctx.globalAlpha = 1 - walls * 0.9;
+    ctx.strokeStyle = '#5f6b7a'; ctx.lineWidth = 6;
+    BLOCKS.forEach(([x, top, w]) => {
+      const cols = Math.round(w / 90);
+      for (let i = 0; i <= cols; i++) line(x + (w / cols) * i, GROUND, x + (w / cols) * i, top);
+      for (let y = top; y < GROUND; y += 110) line(x, y, x + w, y);
+    });
+    ctx.lineWidth = 1.5; ctx.strokeStyle = '#8a6f4d';
+    for (let x = 740; x <= 1140; x += 40) { line(x, GROUND, x, 450); line(x, GROUND, x + 40, GROUND - 60); }
+    for (let y = GROUND - 60; y > 450; y -= 60) line(740, y, 1140, y);
+    ctx.restore();
+
+    // crane
+    ctx.globalAlpha = clamp(build * 2) * (1 - walls);
+    ctx.strokeStyle = '#b3206b'; ctx.lineWidth = 7;
+    line(1440, GROUND + 20, 1440, 300); line(1500, 318, 960, 318);
+    ctx.lineWidth = 2; line(1440, 262, 1500, 318); line(1440, 262, 1100, 318);
+    ctx.strokeStyle = '#12355b';
+    const hookX = 1010 + 180 * Math.sin(build * 3.1);
+    line(hookX, 318, hookX, 400 + 60 * build);
+    ctx.globalAlpha = 1;
+  }
+
+  // finished villa
+  if (walls > 0) {
+    ctx.globalAlpha = walls;
+    BLOCKS.forEach(([x, top, w]) => {
+      ctx.fillStyle = '#f5f2ea'; ctx.fillRect(x, top, w, GROUND - top);
+      ctx.fillStyle = 'rgba(18,53,91,0.10)'; ctx.fillRect(x + w - 26, top, 26, GROUND - top);
+    });
+    ctx.strokeStyle = '#12355b'; ctx.lineWidth = 5;              // pergola on the roof terrace
+    [1140, 1200, 1260, 1318].forEach(x => line(x, 575, x, 520));
+    line(1128, 520, 1330, 520);
+    ctx.fillStyle = '#12355b';
+    WINDOWS.forEach(([x, y, w, h]) => ctx.fillRect(x, y, w, h));
+    ctx.fillStyle = '#2e7fa8'; ctx.fillRect(905, 610, 56, 80);   // door
+    ctx.fillStyle = '#b3206b';                                   // bougainvillea
+    [[748, 600, 30], [770, 575, 24], [738, 568, 20], [760, 548, 16]].forEach(([x, y, r]) => {
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+    });
+    poly([[820, 745], [1180, 738], [1235, 790], [790, 800]], '#58c3cf'); // pool
+    ctx.globalAlpha = 1;
+  }
+
+  // evening
+  if (dusk > 0) {
+    ctx.fillStyle = 'rgba(14,25,56,' + 0.5 * dusk + ')';
+    ctx.fillRect(-200, 540, W + 400, 600);
+    ctx.fillRect(630, 460, 710, 240);
+    ctx.globalAlpha = dusk;
+    ctx.shadowColor = '#ffcf7a'; ctx.shadowBlur = 34;
+    ctx.fillStyle = '#ffd98f';
+    WINDOWS.forEach(([x, y, w, h]) => ctx.fillRect(x, y, w, h));
+    ctx.fillRect(905, 610, 56, 80);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,217,143,0.35)';
+    poly([[820, 745], [1180, 738], [1235, 790], [790, 800]], ctx.fillStyle);
+    ctx.globalAlpha = 1;
+  }
+}
+
+function render(p) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (images.length) {
+    // nearest frame that has already loaded, so scrolling never shows a blank
+    const want = Math.round(span(p, POSTER_FADE, 1) * (images.length - 1));
+    let img = null;
+    for (let d = 0; d < images.length && !img; d++) {
+      for (const i of [want - d, want + d]) {
+        const c = images[i];
+        if (c && c.complete && c.naturalWidth) { img = c; break; }
+      }
+    }
+    if (img) {
+      const s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight) * (1 + 0.06 * ease(p));
+      const w = img.naturalWidth * s, h = img.naturalHeight * s;
+      ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+    }
+    return;
+  }
+  const s = Math.max(cw / W, ch / H), zoom = 1 + 0.16 * ease(p);
+  ctx.setTransform(s * dpr, 0, 0, s * dpr, ((cw - W * s) / 2) * dpr, ((ch - H * s) / 2) * dpr);
+  ctx.translate(985, 600); ctx.scale(zoom, zoom); ctx.translate(-985, -600);
+  drawScene(p);
+}
+
+function update() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  const p = reduced ? 0.66 : clamp(max > 0 ? scrollY / max : 0);
+  if (Math.abs(p - progress) < 0.0005) return;
+  progress = p;
+  render(p);
+  const ready = !images.length || images.some(i => i.complete && i.naturalWidth);
+  poster.style.opacity = reduced ? 0 : ready ? 1 - span(p, 0, POSTER_FADE) : 1;
+  document.querySelectorAll('.rail li').forEach((li, i, all) => {
+    const from = +li.dataset.at, to = all[i + 1] ? +all[i + 1].dataset.at : 1.01;
+    li.classList.toggle('on', p >= from && p < to);
+  });
+}
+
+function resize() {
+  dpr = Math.min(devicePixelRatio || 1, 2);
+  cw = innerWidth; ch = innerHeight;
+  canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
+  progress = -1; update();
+}
+
+let ticking = false;
+addEventListener('scroll', () => {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => { ticking = false; update(); });
+}, { passive: true });
+addEventListener('resize', resize);
+
+if (FRAMES.count > 0) {
+  document.getElementById('note').hidden = true;
+  images = Array.from({ length: FRAMES.count }, () => new Image());
+  // load every 8th frame first for a quick coarse scrub, then fill in the rest
+  const order = [...images.keys()].sort((a, b) => (a % 8 ? 1 : 0) - (b % 8 ? 1 : 0) || a - b);
+  let next = 0;
+  const pump = () => {
+    if (next >= order.length) return;
+    const i = order[next++], img = images[i];
+    img.onload = img.onerror = () => { progress = -1; update(); pump(); };
+    img.src = FRAMES.src(i);
+  };
+  for (let k = 0; k < 6; k++) pump();
+}
+resize();
+</script>
+</body>
+</html>
